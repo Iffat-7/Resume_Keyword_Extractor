@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Iffat's Resume Analyzer ✨</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(to right, #ffe4ec, #ffb6c1);
+      color: #4a0033;
+      text-align: center;
+      padding: 50px;
+      margin: 0;
+    }
+
+    .box {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 750px;
+      margin: auto;
+      box-shadow: 0 0 20px #f06292;
+      border: 3px dashed #f06292;
+    }
+
+    h1 {
+      color: #d81b60;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+      margin-top: 20px;
+      color: #d81b60;
+    }
+
+    button,
+    select {
+      background: #f06292;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      margin: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      box-shadow: 0 4px #d81b60;
+    }
+
+    button:hover,
+    select:hover {
+      background: #d81b60;
+      box-shadow: 0 0 10px #f8bbd0;
+    }
+
+    .keywords {
+      margin-top: 30px;
+    }
+
+    .keywords span {
+      display: inline-block;
+      background: #f06292;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 30px;
+      margin: 5px;
+      font-weight: bold;
+      box-shadow: 0 0 8px #ffccd5;
+    }
+
+    .prediction {
+      background: #ffeef8;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 15px;
+      font-size: 18px;
+      color: #880e4f;
+      animation: fadeIn 1s ease-in-out;
+      border: 1px solid #f8bbd0;
+    }
+
+    canvas {
+      margin-top: 30px;
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 0 10px #f48fb1;
+    }
+
+    label {
+      color: #ad1457;
+      font-weight: bold;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>🌟 Resume Keyword & PDF Analyzer 🌟</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+      <input type="file" name="resume" accept=".pdf" required>
+      <br><br>
+      <button type="submit">Analyze PDF</button>
+    </form>
+
+    {% if extracted %}
+    <div class="keywords">
+      <h2>📝 Found Keywords:</h2>
+      <div id="keywordBox">
+        {% for word, count in extracted.items() %}
+        <span>{{ word }} ({{ count }})</span>
+        {% endfor %}
+      </div>
+      <button onclick="copyKeywords()">📋 Copy All Keywords</button>
+    </div>
+    {% endif %}
+
+    {% if job_type and job_level %}
+    <div class="prediction">
+      <h2>💼 Resume Analysis:</h2>
+      <p>This looks like a <strong>{{ job_level }}</strong> level resume in the field of <strong>{{ job_type
+          }}</strong>.</p>
+    </div>
+    {% endif %}
+
+    {% if pdf_type %}
+    <div class="prediction">
+      <h2>📄 PDF Type Detection:</h2>
+      <p>This PDF appears to be a <strong>{{ pdf_type }}</strong>.</p>
+    </div>
+    {% endif %}
+
+    {% if extracted %}
+    <canvas id="chart" width="400" height="400"></canvas>
+
+    <br>
+    <label for="chartType">📊 Choose Chart Type:</label>
+    <select id="chartType" onchange="updateChartType()">
+      <option value="pie" selected>🎂 Pie Chart</option>
+      <option value="bar">📊 Bar Chart</option>
+    </select>
+
+    <br><br>
+    <button onclick="downloadReport()">📥 Download Results as Text</button>
+    {% endif %}
+  </div>
+
+  {% if extracted %}
+  <script>
+    const labels = {{ extracted.keys() | list | tojson | safe }};
+    const keywordCounts = {{ extracted.values() | list | tojson | safe }};
+    let chartInstance = null;
+
+    function renderChart(type) {
+      const ctx = document.getElementById('chart').getContext('2d');
+      if (chartInstance !== null) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: type,
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Keyword Frequency',
+            data: keywordCounts,
+            backgroundColor: [
+              '#f06292', '#ec407a', '#e91e63', '#d81b60', '#c2185b',
+              '#ad1457', '#f8bbd0', '#f48fb1', '#f06292', '#d81b60'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              position: type === 'pie' ? 'bottom' : 'top'
+            }
+          },
+          scales: type === 'bar' ? {
+            y: {
+              beginAtZero: true
+            }
+          } : {},
+          responsive: true
+        }
+      });
+    }
+
+    function updateChartType() {
+      const type = document.getElementById("chartType").value;
+      renderChart(type);
+    }
+
+    function copyKeywords() {
+      const text = document.getElementById("keywordBox").innerText;
+      navigator.clipboard.writeText(text);
+      alert("✨ Keywords copied to clipboard!");
+    }
+
+    function downloadReport() {
+      const text = `
+Iffat's Resume Analyzer Report
+===============================
+PDF Type: {{ pdf_type }}
+Job Field: {{ job_type }}
+Job Level: {{ job_level }}
+
+Keywords:
+{% for word, count in extracted.items() %}
+- {{ word }}: {{ count }}
+{% endfor %}
+`;
+      const blob = new Blob([text], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.download = "resume_analysis_report.txt";
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }
+
+    // Initial chart load
+    renderChart('pie');
+  </script>
+  {% endif %}
+</body>
+
+</html>

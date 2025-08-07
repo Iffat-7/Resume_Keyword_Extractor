@@ -1,0 +1,13 @@
+>>> Flask
+<<< flask for web interfernce.
+
+>>>SpaCy
+<<< spacy  for NLP.
+
+>>>pdfminer or pyMupdf
+<<< pdfminer or pyMupdf to read pdfs python storing login for filtering.
+
+
+Folder Structure:
+
+

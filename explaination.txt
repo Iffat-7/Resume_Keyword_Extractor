@@ -1,0 +1,17 @@
+----------------------------What it Does--------------------------
+
+**** You upload a resume (PDF ora a plain text)
+**** it Extracts Keywords like:
+         * SKILLS (e.g. python, Django)
+         * JOB TITLES (e.g. Developer, Intern)
+         * TOOLS (e.g. Excel, SQL)
+it shows 'RESULT NEATLY'.
+
+
+| Feature               | Status          |
+| --------------------- | --------------- |
+| Pie + Bar toggle      | ✅ Fully Working |
+| Copy to clipboard     | ✅ Done          |
+| Download TXT report   | ✅ Added         |
+| All errors fixed      | ✅ Yes           |
+| Chart colors & styles | 🎨 Beautiful!   |
