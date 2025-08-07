@@ -8,6 +8,3 @@
 <<< pdfminer or pyMupdf to read pdfs python storing login for filtering.
 
 
-Folder Structure:
-
-
